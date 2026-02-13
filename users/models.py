@@ -61,7 +61,6 @@ class UserEducation(models.Model):
     
     class Meta:
         ordering = ['-start_date']
-    
     def __str__(self):
         return f"{self.degree} in {self.field_of_study} at {self.institution}"
 
