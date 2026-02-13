@@ -1,0 +1,46 @@
+{% extends "base/base.html" %}
+
+{% block title %}Messages · Nokri{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 py-10">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">Messages</h1>
+      <p class="text-sm text-gray-500">Stay in touch with candidates and employers in real time.</p>
+    </div>
+  </div>
+
+  {% if threads %}
+    <div class="bg-white shadow-sm rounded-2xl divide-y">
+      {% for item in threads %}
+        <a href="{% url 'chat:conversation' item.thread.id %}" class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition">
+          <div>
+            <h2 class="text-lg font-medium text-gray-900">{{ item.other_user.get_full_name|default:item.other_user.username }}</h2>
+            {% if item.last_message %}
+              <p class="text-sm text-gray-500 mt-1">
+                <span class="font-semibold">{{ item.last_message.sender.username }}:</span>
+                {{ item.last_message.content|truncatechars:80 }}
+              </p>
+            {% else %}
+              <p class="text-sm text-gray-400 mt-1">No messages yet. Say hello!</p>
+            {% endif %}
+          </div>
+          {% if item.last_message %}
+            <span class="text-xs text-gray-400">{{ item.last_message.created_at|timesince }} ago</span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="bg-white border border-dashed border-gray-200 rounded-2xl p-12 text-center">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">No conversations yet</h2>
+      <p class="text-gray-500 mb-6">Once you apply for jobs or receive applications, you can start chatting right away.</p>
+      <a href="{% url 'jobs:job_list' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
+        Browse Jobs
+      </a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
+
