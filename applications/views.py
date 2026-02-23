@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions
+from rest_framework.exceptions import PermissionDenied
 from .models import Application
 from .serializers import ApplicationSerializer
 
@@ -17,3 +18,9 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(applicant=self.request.user)
+
+    def perform_update(self, serializer):
+        # Prevent candidates from changing the status
+        if 'status' in self.request.data and not hasattr(self.request.user, 'company_profile'):
+            raise PermissionDenied("You do not have permission to change the status of this application.")
+        serializer.save()

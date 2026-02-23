@@ -14,7 +14,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = '__all__'
-        read_only_fields = ['applicant', 'applied_at', 'updated_at', 'status']
+        read_only_fields = ['applicant', 'applied_at', 'updated_at']
 
     def create(self, validated_data):
         job_id = validated_data.pop('job_id')
