@@ -80,6 +80,7 @@ class Job(models.Model):
     application_deadline = models.DateTimeField(blank=True, null=True)
     application_email = models.EmailField(blank=True)
     application_url = models.URLField(blank=True)
+    views_count = models.PositiveIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -34,14 +34,26 @@ class JobSerializer(serializers.ModelSerializer):
     )
     job_type = JobTypeSerializer(read_only=True)
     applications_count = serializers.SerializerMethodField()
+    has_applied = serializers.SerializerMethodField()
 
     def get_applications_count(self, obj):
         return obj.applications.count()
     
+    def get_has_applied(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            # Check the Application model in the 'applications' app via reverse relation
+            return obj.applications.filter(applicant=request.user).exists()
+        return False
+    
     class Meta:
         model = Job
         fields = '__all__'
-        read_only_fields = ['company', 'created_at', 'updated_at', 'posted_at', 'is_active', 'status']
+        read_only_fields = [
+            'company', 'created_at', 'updated_at', 'posted_at', 
+            'is_active', 'status', 'applications_count', 'views_count',
+            'has_applied'
+        ]
 
 class SavedJobSerializer(serializers.ModelSerializer):
     job = JobSerializer(read_only=True)

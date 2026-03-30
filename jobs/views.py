@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, status
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Job, Category, Location, JobType, SavedJob
 from .serializers import (
@@ -15,6 +16,14 @@ class JobViewSet(viewsets.ModelViewSet):
     filterset_fields = ['category', 'job_type', 'is_remote', 'status', 'experience_level', 'salary_min', 'salary_max']
     search_fields = ['title', 'description', 'company__name']
     ordering_fields = ['created_at', 'salary_min']
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Increment views_count
+        instance.views_count += 1
+        instance.save(update_fields=['views_count'])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         try:
