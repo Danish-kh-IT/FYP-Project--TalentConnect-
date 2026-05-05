@@ -1,0 +1,130 @@
+{% extends "base/base.html" %}
+
+{% block title %}Chat with {{ other_user.get_full_name|default:other_user.username }} · Nokri{% endblock %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto px-4 py-10">
+  <div class="bg-white shadow-sm rounded-2xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-gray-900">
+          {{ other_user.get_full_name|default:other_user.username }}
+        </h1>
+        <p class="text-sm text-gray-500">
+          Real-time chat powered by WebSockets
+        </p>
+      </div>
+      <a href="{% url 'chat:inbox' %}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+        ← Back to inbox
+      </a>
+    </div>
+
+    <div class="h-[520px] flex flex-col">
+      <div id="message-list" class="flex-1 overflow-y-auto px-6 py-4 space-y-3 bg-gray-50">
+        {% for message in messages %}
+          <div class="flex {% if message.sender_id == request.user.id %}justify-end{% else %}justify-start{% endif %}">
+            <div class="max-w-[70%] rounded-2xl px-4 py-2 text-sm leading-relaxed {% if message.sender_id == request.user.id %}bg-blue-600 text-white{% else %}bg-white text-gray-800 shadow{% endif %}">
+              <p class="font-semibold text-xs mb-1 {% if message.sender_id == request.user.id %}text-blue-100{% else %}text-gray-500{% endif %}">
+                {{ message.sender.username }}
+              </p>
+              <p>{{ message.content|linebreaksbr }}</p>
+              <p class="text-[11px] mt-2 opacity-70">{{ message.created_at|date:"M j, g:i a" }}</p>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-center text-gray-400 text-sm mt-10">
+            No messages yet. Start the conversation!
+          </div>
+        {% endfor %}
+      </div>
+
+      <form id="chat-form" class="border-t border-gray-100 bg-white px-4 py-3 flex items-center space-x-3">
+        {% csrf_token %}
+        <input
+          id="chat-input"
+          type="text"
+          placeholder="Type your message…"
+          class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          autocomplete="off"
+          maxlength="2000"
+          required
+        >
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition disabled:opacity-50"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+{{ thread.id|json_script:"thread-id" }}
+{{ request.user.username|json_script:"current-username" }}
+
+<script>
+  (function () {
+    const threadId = JSON.parse(document.getElementById("thread-id").textContent);
+    const currentUser = JSON.parse(document.getElementById("current-username").textContent);
+    const messageList = document.getElementById("message-list");
+    const input = document.getElementById("chat-input");
+    const form = document.getElementById("chat-form");
+
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/${threadId}/`);
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      renderMessage(data);
+    };
+
+    socket.onopen = () => {
+      input.focus();
+    };
+
+    socket.onerror = () => {
+      console.error("Unable to establish chat connection.");
+    };
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const message = input.value.trim();
+      if (!message) {
+        return;
+      }
+      socket.send(JSON.stringify({ message }));
+      input.value = "";
+      input.focus();
+    });
+
+    function renderMessage(payload) {
+      const isCurrentUser = payload.sender_username === currentUser;
+      const container = document.createElement("div");
+      container.className = `flex ${isCurrentUser ? "justify-end" : "justify-start"}`;
+
+      const bubble = document.createElement("div");
+      bubble.className = `max-w-[70%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${isCurrentUser ? "bg-blue-600 text-white" : "bg-white text-gray-800 shadow"}`;
+
+      const sender = document.createElement("p");
+      sender.className = `font-semibold text-xs mb-1 ${isCurrentUser ? "text-blue-100" : "text-gray-500"}`;
+      sender.textContent = payload.sender_username;
+      bubble.appendChild(sender);
+
+      const message = document.createElement("p");
+      message.textContent = payload.content;
+      bubble.appendChild(message);
+
+      const timestamp = document.createElement("p");
+      timestamp.className = "text-[11px] mt-2 opacity-70";
+      timestamp.textContent = new Date(payload.created_at).toLocaleString();
+      bubble.appendChild(timestamp);
+
+      container.appendChild(bubble);
+      messageList.appendChild(container);
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+  })();
+</script>
+{% endblock %}
+

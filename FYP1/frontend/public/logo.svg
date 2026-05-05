@@ -1,0 +1,25 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with rounded corners matching user image -->
+  <rect x="5" y="5" width="90" height="90" rx="20" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+  
+  <!-- The TC Star/Network Icon -->
+  <g transform="translate(20, 15)">
+    <!-- Main Star/Network Shape -->
+    <path d="M30 0L37.5 22.5H60L42 36L49.5 58.5L30 45L10.5 58.5L18 36L0 22.5H22.5L30 0Z" fill="#0284C7" fill-opacity="0.1"/>
+    <path d="M30 5L36 23H55L39 34L45 52L30 41L15 52L21 34L5 23H24L30 5Z" stroke="#0284C7" stroke-width="2.5" stroke-linejoin="round"/>
+    
+    <!-- People/Nodes on points -->
+    <circle cx="30" cy="5" r="4" fill="#0284C7"/>
+    <circle cx="5" cy="23" r="4" fill="#0284C7"/>
+    <circle cx="55" cy="23" r="4" fill="#0284C7"/>
+    
+    <!-- Bar chart / Arrow logic inside -->
+    <rect x="22" y="32" width="4" height="8" rx="1" fill="#0284C7"/>
+    <rect x="28" y="28" width="4" height="12" rx="1" fill="#0284C7"/>
+    <rect x="34" y="24" width="4" height="16" rx="1" fill="#0284C7"/>
+    <path d="M22 36L38 22L38 28M38 22L32 22" stroke="#0284C7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- TC Text -->
+  <text x="50" y="85" font-family="Arial, sans-serif" font-weight="900" font-size="24" fill="#0284C7" text-anchor="middle" letter-spacing="1">TC</text>
+</svg>
